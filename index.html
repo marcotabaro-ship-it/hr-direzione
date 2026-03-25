@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1565C0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HR Direzione">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <title>HR Direzione</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+    html,body{width:100%;height:100%;overflow:hidden;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F0F4F8;color:#1A202C;font-size:16px;line-height:1.5;}
+    #login{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0D1B2A 0%,#1565C0 60%,#0D47A1 100%);padding:24px;}
+    .lcard{background:white;border-radius:24px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.4);}
+    .lhead{background:linear-gradient(135deg,#1565C0,#0D47A1);padding:36px 28px 28px;text-align:center;}
+    .llogo{width:76px;height:76px;border-radius:18px;background:white;padding:6px;object-fit:contain;box-shadow:0 6px 20px rgba(0,0,0,.25);margin-bottom:14px;}
+    .lname{color:white;font-size:22px;font-weight:800;display:block;margin-bottom:4px;}
+    .lsub{color:rgba(255,255,255,.75);font-size:13px;}
+    .lbody{padding:28px 28px 20px;}
+    .lfoot{padding:0 28px 24px;text-align:center;font-size:11px;color:#94A3B8;}
+    .lbl{display:block;margin-bottom:7px;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;}
+    .linp{width:100%;padding:15px 16px;border:1.5px solid #E2E8F0;border-radius:14px;font-size:16px;background:#F8FAFC;outline:none;margin-bottom:16px;transition:border-color .2s;}
+    .linp:focus{border-color:#1565C0;background:white;}
+    .lerr{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:12px 16px;color:#DC2626;font-size:14px;font-weight:500;margin-bottom:16px;display:none;}
+    .lbtn{width:100%;padding:17px;background:linear-gradient(135deg,#1565C0,#0D47A1);color:white;border:none;border-radius:14px;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,.4);}
+    .lbtn:active{opacity:.85;} .lbtn:disabled{opacity:.55;}
+    #app{display:none;flex-direction:column;height:100dvh;}
+    #app.vis{display:flex;}
+    .topbar{background:linear-gradient(135deg,#1565C0,#0D47A1);padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:12px;flex-shrink:0;box-shadow:0 2px 12px rgba(21,101,192,.3);}
+    .tlogo{width:36px;height:36px;border-radius:10px;background:white;padding:3px;object-fit:contain;flex-shrink:0;}
+    .tinfo{flex:1;overflow:hidden;}
+    .ttitle{color:white;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .tsub{color:rgba(255,255,255,.7);font-size:11px;}
+    .tuser{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border-radius:20px;padding:6px 12px 6px 6px;cursor:pointer;flex-shrink:0;}
+    .tav{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;color:#1565C0;font-size:13px;font-weight:900;}
+    .tnome{color:white;font-size:13px;font-weight:700;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    #content{flex:1;overflow-y:auto;padding:16px 16px 80px;-webkit-overflow-scrolling:touch;}
+    .bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1.5px solid #E2E8F0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -4px 20px rgba(0,0,0,.08);}
+    .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:#94A3B8;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;padding:10px 2px;}
+    .nb svg{width:26px;height:26px;fill:currentColor;} .nb.act{color:#1565C0;}
+    .hwelcome{font-size:13px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin:0 0 16px;}
+    .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+    .tile{border-radius:20px;padding:22px 18px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s;min-height:150px;display:flex;flex-direction:column;align-items:flex-start;}
+    .tile:active{transform:scale(.96);box-shadow:0 2px 8px rgba(0,0,0,.12);}
+    .tico{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+    .tico svg{width:34px;height:34px;fill:white;}
+    .tlbl{color:white;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin:0 0 4px;}
+    .tdsc{color:rgba(255,255,255,.82);font-size:13px;margin:0;}
+    .t-blu{background:linear-gradient(135deg,#1565C0,#1976D2);}
+    .t-grn{background:linear-gradient(135deg,#2E7D32,#43A047);}
+    .t-pur{background:linear-gradient(135deg,#6A1B9A,#8E24AA);}
+    .t-org{background:linear-gradient(135deg,#E65100,#F57C00);}
+    .kgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .kbox{background:white;border-radius:16px;padding:18px;border-left:5px solid #1565C0;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+    .klbl{font-size:10px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;}
+    .kval{font-size:44px;font-weight:900;line-height:1;margin:0;}
+    .shdr{display:flex;align-items:center;gap:10px;margin:20px 0 12px;padding-bottom:10px;border-bottom:2px solid #E2E8F0;}
+    .shdr-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .shdr-ico svg{width:20px;height:20px;fill:white;} .shdr-t{font-size:17px;font-weight:800;color:#1A202C;}
+    .drow{padding:12px 16px;border-bottom:1px solid #F1F5F9;} .drow:last-child{border-bottom:none;}
+    .dtop{display:flex;align-items:center;margin-bottom:7px;}
+    .ddot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+    .dnome{font-size:13px;font-weight:700;color:#1A202C;flex:1;padding:0 10px;}
+    .dn{font-size:14px;font-weight:800;flex-shrink:0;}
+    .dbar-w{width:100%;height:8px;background:#F1F5F9;border-radius:4px;overflow:hidden;}
+    .dbar{height:100%;border-radius:4px;}
+    .clist{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px;}
+    .crow{display:flex;align-items:center;gap:14px;padding:15px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;}
+    .crow:last-child{border-bottom:none;} .crow:active{background:#F8FAFC;}
+    .cav{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:18px;flex-shrink:0;}
+    .cbody{flex:1;overflow:hidden;min-width:0;}
+    .cnome{font-size:16px;font-weight:700;color:#1A202C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 0 3px;}
+    .crole{font-size:13px;font-weight:600;color:#1565C0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 0 2px;}
+    .carea{font-size:12px;color:#94A3B8;margin:0;}
+    .chev{width:20px;height:20px;fill:#CBD5E1;flex-shrink:0;}
+    .rcard{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px;display:flex;align-items:center;cursor:pointer;}
+    .rcard:active{opacity:.9;}
+    .rstripe{width:6px;align-self:stretch;flex-shrink:0;}
+    .rbody{flex:1;padding:15px 12px;overflow:hidden;min-width:0;}
+    .rtitle{font-size:15px;font-weight:700;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .rarea{font-size:13px;font-weight:600;margin:0;}
+    .rright{padding:15px 14px 15px 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .rbadge{background:#EFF6FF;color:#1565C0;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:800;}
+    .dcard{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px;cursor:pointer;}
+    .dcard:active{opacity:.9;}
+    .dcard-hdr{padding:14px 16px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+    .dcat{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+    .drev{font-size:11px;font-weight:700;color:#64748B;}
+    .dtitle{font-size:15px;font-weight:700;color:#1A202C;padding:6px 16px 14px;margin:0;line-height:1.3;}
+    .ddest{padding:0 16px 14px;margin:0;font-size:11px;color:#94A3B8;}
+    .stamp{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px;display:flex;align-items:center;cursor:pointer;}
+    .stamp:active{opacity:.9;}
+    .stamp-ico{width:72px;height:72px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .stamp-ico svg{width:32px;height:32px;fill:white;}
+    .stamp-body{flex:1;padding:0 14px;}
+    .stamp-lbl{font-size:16px;font-weight:700;color:#1A202C;margin:0 0 4px;}
+    .stamp-sub{font-size:13px;color:#64748B;margin:0;}
+    .stamp-arr{width:22px;height:22px;fill:#CBD5E1;margin-right:14px;flex-shrink:0;}
+    .swrap{position:relative;margin-bottom:14px;}
+    .sico{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;fill:#94A3B8;}
+    .sinp{width:100%;padding:16px 16px 16px 46px;border:1.5px solid #E2E8F0;border-radius:14px;font-size:16px;background:white;outline:none;transition:border-color .2s;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+    .sinp:focus{border-color:#1565C0;}
+    .catbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none;}
+    .catbar::-webkit-scrollbar{display:none;}
+    .catbtn{padding:9px 18px;border-radius:20px;border:1.5px solid #E2E8F0;background:white;font-size:13px;font-weight:700;color:#64748B;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all .15s;}
+    .catbtn.act{background:#1565C0;border-color:#1565C0;color:white;}
+    .shov{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .shov.open{opacity:1;pointer-events:auto;}
+    .sheet{position:fixed;bottom:0;left:0;right:0;background:white;border-radius:22px 22px 0 0;max-height:88vh;overflow-y:auto;z-index:201;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);padding-bottom:env(safe-area-inset-bottom,16px);-webkit-overflow-scrolling:touch;}
+    .sheet.open{transform:translateY(0);}
+    .shandle{width:36px;height:4px;background:#CBD5E1;border-radius:2px;margin:12px auto 0;}
+    .shhdr{padding:16px 20px 12px;border-bottom:1px solid #F1F5F9;display:flex;justify-content:space-between;align-items:center;}
+    .shhtitle{font-size:20px;font-weight:800;}
+    .shclose{width:34px;height:34px;border-radius:50%;background:#F1F5F9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .shclose svg{width:18px;height:18px;fill:#64748B;}
+    .shbody{padding:16px 20px 8px;}
+    .dlbl{font-size:10px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 5px;padding-bottom:4px;border-bottom:1px solid #F1F5F9;}
+    .dval{font-size:15px;color:#1A202C;line-height:1.7;white-space:pre-wrap;margin:0 0 4px;}
+    .pwdmod{position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,.55);display:none;align-items:flex-end;}
+    .pwdmod.open{display:flex;}
+    .pwdinner{background:white;border-radius:24px 24px 0 0;padding:24px 24px 8px;width:100%;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));}
+    .pwdtitle{font-size:20px;font-weight:800;margin:0 0 20px;}
+    .pwderr{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:12px 16px;color:#DC2626;font-size:14px;margin-bottom:14px;display:none;}
+    .pwdok{background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:12px 16px;color:#166534;font-size:14px;margin-bottom:14px;display:none;}
+    .pwdlbl{display:block;margin-bottom:7px;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;}
+    .pwdinp{width:100%;padding:15px 16px;border:1.5px solid #E2E8F0;border-radius:14px;font-size:16px;outline:none;margin-bottom:14px;}
+    .pwdinp:focus{border-color:#1565C0;}
+    .btnblu{display:block;width:100%;padding:16px;background:#1565C0;color:white;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;}
+    .btngry{display:block;width:100%;padding:14px;background:#F1F5F9;color:#475569;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;}
+    .banw{background:#FFFBEB;border:1px solid #F59E0B;border-left:5px solid #F59E0B;border-radius:14px;padding:14px 16px;margin-bottom:16px;}
+    .banw-t{font-size:13px;font-weight:700;color:#92400E;margin:0 0 4px;}
+    .banw-s{font-size:12px;color:#78350F;margin:0 0 10px;}
+    #notif{position:fixed;bottom:84px;left:16px;right:16px;background:#10B981;color:white;padding:14px 20px;border-radius:14px;font-weight:700;font-size:14px;text-align:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;box-shadow:0 4px 20px rgba(16,185,129,.4);}
+    #notif.show{opacity:1;}
+    .empty{text-align:center;padding:40px 20px;color:#94A3B8;}
+    .empty-ico{font-size:48px;margin-bottom:12px;} .empty-t{font-size:15px;font-weight:600;}
+    .loading{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:16px;}
+    .spinner{width:40px;height:40px;border:4px solid #E2E8F0;border-top-color:#1565C0;border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+  </style>
+</head>
+<body>
+<div id="login">
+  <div class="lcard">
+    <div class="lhead">
+      <img src="icon-192.png" class="llogo" alt="Logo" onerror="this.style.display='none'">
+      <span class="lname">HR Direzione</span>
+      <span class="lsub">Sistema Integrato Gruppo F4</span>
+    </div>
+    <div class="lbody">
+      <div id="lerr" class="lerr"></div>
+      <label class="lbl" for="lu">Username</label>
+      <input type="text" id="lu" class="linp" placeholder="Il tuo username" autocapitalize="none" autocorrect="off" autocomplete="username">
+      <label class="lbl" for="lp">Password</label>
+      <input type="password" id="lp" class="linp" placeholder="Password" autocomplete="current-password">
+      <button class="lbtn" id="lbtn" onclick="doLogin()">Accedi</button>
+    </div>
+    <div class="lfoot">Accesso riservato al personale autorizzato</div>
+  </div>
+</div>
+<div class="pwdmod" id="pwdmod">
+  <div class="pwdinner">
+    <p class="pwdtitle">Cambia Password</p>
+    <div id="pwderr" class="pwderr"></div>
+    <div id="pwdok"  class="pwdok"></div>
+    <label class="pwdlbl">Password attuale</label>
+    <input type="password" id="pwd1" class="pwdinp" placeholder="Password attuale">
+    <label class="pwdlbl">Nuova password (min. 8 car.)</label>
+    <input type="password" id="pwd2" class="pwdinp" placeholder="Nuova password">
+    <label class="pwdlbl">Conferma nuova password</label>
+    <input type="password" id="pwd3" class="pwdinp" placeholder="Conferma">
+    <button class="btnblu" onclick="doCambioPwd()">Salva Password</button>
+    <button class="btngry" onclick="closePwd()">Annulla</button>
+  </div>
+</div>
+<div class="shov" id="shov" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="shandle"></div>
+  <div class="shhdr">
+    <span class="shhtitle" id="sht">Dettaglio</span>
+    <button class="shclose" onclick="closeSheet()">
+      <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>
+  </div>
+  <div class="shbody" id="shb"></div>
+</div>
+<div id="notif"></div>
+<div id="app">
+  <div class="topbar">
+    <img src="icon-192.png" class="tlogo" alt="Logo" onerror="this.style.display='none'">
+    <div class="tinfo">
+      <div class="ttitle" id="pgtitle">Plancia</div>
+      <div class="tsub">Gestionale HR</div>
+    </div>
+    <div class="tuser" onclick="openPwd()">
+      <div class="tav" id="tav">?</div>
+      <span class="tnome" id="tnome">-</span>
+    </div>
+  </div>
+  <div id="content"><div class="loading"><div class="spinner"></div></div></div>
+  <nav class="bnav">
+    <button class="nb act" data-v="home" onclick="goTo('home')">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home
+    </button>
+    <button class="nb" data-v="organigramma" onclick="goTo('organigramma')">
+      <svg viewBox="0 0 24 24"><path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"/></svg>Org.
+    </button>
+    <button class="nb" data-v="mansionario" onclick="goTo('mansionario')">
+      <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>Ruoli
+    </button>
+    <button class="nb" data-v="comunicazioni" onclick="goTo('comunicazioni')">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Doc.
+    </button>
+    <button class="nb" data-v="stampe" onclick="goTo('stampe')">
+      <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>Stampe
+    </button>
+  </nav>
+</div>
+<script>
+var API="https://script.google.com/macros/s/AKfycbxCDvNOgzG896tTvdtolj8tSkK-u8gNBhWE6-VNGSxtUQKRssMH_R2jb2VgWIzsTIQgRA/exec";
+var S={token:null,ruolo:null,nome:null};
+var ECO=null,STATO_DOC=null,DOCS=[];
+function api(p){var qs=Object.keys(p).map(function(k){return k+"="+encodeURIComponent(p[k]);}).join("&");return fetch(API+"?"+qs).then(function(r){return r.json();});}
+function showNotif(msg){var el=document.getElementById("notif");el.textContent=msg;el.classList.add("show");setTimeout(function(){el.classList.remove("show");},3000);}
+function openSheet(t,h){document.getElementById("sht").textContent=t;document.getElementById("shb").innerHTML=h;document.getElementById("shov").classList.add("open");document.getElementById("sheet").classList.add("open");document.getElementById("sheet").scrollTop=0;}
+function closeSheet(){document.getElementById("shov").classList.remove("open");document.getElementById("sheet").classList.remove("open");}
+function setTitle(t){document.getElementById("pgtitle").textContent=t;}
+function setNav(id){document.querySelectorAll(".nb").forEach(function(b){b.classList.toggle("act",b.getAttribute("data-v")===id);});}
+function loading(){document.getElementById("content").innerHTML='<div class="loading"><div class="spinner"></div></div>';}
+var PAL=[[207,88,38],[142,70,34],[25,86,42],[262,66,42],[173,74,32],[325,63,40],[43,80,38],[0,68,38],[88,58,34],[195,78,32],[230,68,40],[55,74,35]];
+var MAP={};
+function hslToHex(h,s,l){l=l/100;var a=s*Math.min(l,1-l)/100;var f=function(n){var k=(n+h/30)%12;var c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c).toString(16).padStart(2,"0");};return "#"+f(0)+f(8)+f(4);}
+function hA(nome){var n=(nome||"").toUpperCase().trim();if(MAP[n]===undefined)MAP[n]=Object.keys(MAP).length%PAL.length;return PAL[MAP[n]];}
+function cArea(n){var p=hA(n);return hslToHex(p[0],p[1],p[2]);}
+function cResp(n){var p=hA(n);return hslToHex(p[0],Math.min(p[1]+10,100),Math.max(p[2]-12,8));}
+function bgResp(n){var p=hA(n);return hslToHex(p[0],38,96);}
+function cR(n,r){return r?cResp(n):cArea(n);}
+function bgR(n,r){return r?bgResp(n):"white";}
+function ordinaAss(inc,eco){return inc.slice().sort(function(a,b){var aA=eco.aree.find(function(ar){return ar.ID_Area===a.ID_Area_Aziendale;});var aB=eco.aree.find(function(ar){return ar.ID_Area===b.ID_Area_Aziendale;});var nA=aA?aA.Nome_Area:"";var nB=aB?aB.Nome_Area:"";if(nA!==nB)return nA.localeCompare(nB,"it");var rA=eco.ruoli.find(function(r){return r.ID_Ruolo===a.ID_Ruolo;});var rB=eco.ruoli.find(function(r){return r.ID_Ruolo===b.ID_Ruolo;});var pA=rA&&rA.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE")>=0?0:1;var pB=rB&&rB.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE")>=0?0:1;if(pA!==pB)return pA-pB;var rsA=eco.risorse.find(function(r){return r.ID_Risorsa===a.ID_Risorsa;});var rsB=eco.risorse.find(function(r){return r.ID_Risorsa===b.ID_Risorsa;});var cA=rsA?rsA.Cognome:"";var cB=rsB?rsB.Cognome:"";if(cA!==cB)return cA.localeCompare(cB,"it");var tA=rA?rA.Titolo_Ruolo:"";var tB=rB?rB.Titolo_Ruolo:"";return tA.localeCompare(tB,"it");});}
+function openPwd(){["pwd1","pwd2","pwd3"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("pwderr").style.display="none";document.getElementById("pwdok").style.display="none";document.getElementById("pwdmod").classList.add("open");}
+function closePwd(){document.getElementById("pwdmod").classList.remove("open");}
+function doCambioPwd(){var old=document.getElementById("pwd1").value;var nw=document.getElementById("pwd2").value;var cfm=document.getElementById("pwd3").value;var err=document.getElementById("pwderr");var ok=document.getElementById("pwdok");err.style.display="none";ok.style.display="none";if(!old){err.textContent="Inserisci la password attuale.";err.style.display="block";return;}if(nw.length<8){err.textContent="Min. 8 caratteri.";err.style.display="block";return;}if(nw!==cfm){err.textContent="Le password non coincidono.";err.style.display="block";return;}api({action:"cambiapwd",token:S.token,vecchia:old,nuova:nw}).then(function(r){if(r.esito){ok.textContent="Password cambiata!";ok.style.display="block";setTimeout(closePwd,2000);}else{err.textContent=r.errore||"Errore.";err.style.display="block";}}).catch(function(){err.textContent="Errore di connessione.";err.style.display="block";});}
+function doLogin(){var u=(document.getElementById("lu").value||"").trim();var p=document.getElementById("lp").value||"";var err=document.getElementById("lerr");var btn=document.getElementById("lbtn");err.style.display="none";if(!u||!p){err.textContent="Inserisci username e password.";err.style.display="block";return;}btn.disabled=true;btn.textContent="Accesso in corso...";api({action:"login",username:u,password:p}).then(function(r){btn.disabled=false;btn.textContent="Accedi";if(!r.esito){err.textContent=r.errore||"Credenziali non valide.";err.style.display="block";document.getElementById("lp").value="";return;}localStorage.setItem("hr_token",r.token);localStorage.setItem("hr_ruolo",r.ruolo);localStorage.setItem("hr_nome",r.nome);avviaApp(r.token,r.ruolo,r.nome);}).catch(function(){btn.disabled=false;btn.textContent="Accedi";err.textContent="Errore di connessione. Riprova.";err.style.display="block";});}
+function avviaApp(token,ruolo,nome){S={token:token,ruolo:ruolo,nome:nome};document.getElementById("login").style.display="none";document.getElementById("app").classList.add("vis");document.getElementById("tav").textContent=(nome||"?").charAt(0).toUpperCase();document.getElementById("tnome").textContent=nome||"";goTo("home");}
+function goTo(id){setNav(id);closeSheet();loading();var titles={home:"Plancia",organigramma:"Organigramma",mansionario:"Catalogo Ruoli",comunicazioni:"Comunicazioni HR",stampe:"Centro Stampe"};setTitle(titles[id]||id);var errHtml='<div class="empty"><div class="empty-ico">&#9888;&#65039;</div><p class="empty-t">Errore di connessione</p></div>';if(id==="home"){Promise.all([api({action:"eco",token:S.token}),api({action:"stato",token:S.token})]).then(function(res){ECO=res[0];STATO_DOC=res[1];renderHome();}).catch(function(){document.getElementById("content").innerHTML=errHtml;});}else if(id==="organigramma"){(ECO?Promise.resolve(ECO):api({action:"eco",token:S.token}).then(function(d){ECO=d;return d;})).then(renderOrg).catch(function(){document.getElementById("content").innerHTML=errHtml;});}else if(id==="mansionario"){(ECO?Promise.resolve(ECO):api({action:"eco",token:S.token}).then(function(d){ECO=d;return d;})).then(renderMansionario).catch(function(){document.getElementById("content").innerHTML=errHtml;});}else if(id==="comunicazioni"){api({action:"comunicazioni",token:S.token}).then(renderComunicazioni).catch(function(){document.getElementById("content").innerHTML=errHtml;});}else if(id==="stampe"){Promise.all([ECO?Promise.resolve(ECO):api({action:"eco",token:S.token}).then(function(d){ECO=d;return d;}),api({action:"stato",token:S.token})]).then(function(res){STATO_DOC=res[1];renderStampe();}).catch(function(){document.getElementById("content").innerHTML=errHtml;});}}
+function renderHome(){var eco=ECO;var stato=STATO_DOC;var inc=eco.assegnazioni.filter(function(a){return a.Stato_Assegnazione==="Attivo";});var cop=inc.filter(function(a){var r=eco.risorse.find(function(r2){return r2.ID_Risorsa===a.ID_Risorsa;});return r&&r.Stato_Operativo==="Attivo";}).length;var sco=inc.length-cop;var att=eco.risorse.filter(function(r){return r.Stato_Operativo==="Attivo";}).length;var tasso=inc.length>0?Math.round(cop/inc.length*100):0;var h="";if(stato&&stato.alertScadenza){var doc=(stato.documenti&&stato.documenti["ORG"])?stato.documenti["ORG"]:{};h+='<div class="banw"><p class="banw-t">Revisione SGQ richiesta</p><p class="banw-s">'+(doc.codiceUfficiale||"")+" del "+(doc.dataApprovazione||"")+"</p></div>";}h+='<p class="hwelcome">Accesso rapido</p><div class="tgrid">';h+='<div class="tile t-blu" onclick="goTo(\'organigramma\')"><div class="tico"><svg viewBox="0 0 24 24"><path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"/></svg></div><p class="tlbl">Organigramma</p><p class="tdsc">Struttura aziendale</p></div>';h+='<div class="tile t-grn" onclick="goTo(\'mansionario\')"><div class="tico"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg></div><p class="tlbl">Mansionario</p><p class="tdsc">Catalogo ruoli</p></div>';h+='<div class="tile t-pur" onclick="goTo(\'comunicazioni\')"><div class="tico"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><p class="tlbl">Comunicazioni</p><p class="tdsc">Documenti HR</p></div>';h+='<div class="tile t-org" onclick="goTo(\'stampe\')"><div class="tico"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></div><p class="tlbl">Stampe</p><p class="tdsc">PDF e report</p></div>';h+="</div>";h+='<div class="shdr"><div class="shdr-ico" style="background:#1565C0"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></div><span class="shdr-t">Cruscotto</span></div>';h+='<div class="kgrid">';h+='<div class="kbox" style="border-left-color:#1565C0"><p class="klbl">Risorse Attive</p><p class="kval" style="color:#1565C0">'+att+'</p></div>';h+='<div class="kbox" style="border-left-color:#2E7D32"><p class="klbl">Ruoli Coperti</p><p class="kval" style="color:#2E7D32">'+cop+'</p></div>';h+='<div class="kbox" style="border-left-color:'+(sco>0?"#C62828":"#2E7D32")+'"><p class="klbl">Ruoli Scoperti</p><p class="kval" style="color:'+(sco>0?"#C62828":"#2E7D32")+'">'+sco+'</p></div>';h+='<div class="kbox" style="border-left-color:'+(tasso<85?"#E65100":"#2E7D32")+'"><p class="klbl">Copertura</p><p class="kval" style="color:'+(tasso<85?"#E65100":"#2E7D32")+'">'+tasso+'%</p></div>';h+="</div>";var distA={};inc.forEach(function(a){var ar=eco.aree.find(function(x){return x.ID_Area===a.ID_Area_Aziendale;});var nn=ar?ar.Nome_Area:"N/D";distA[nn]=(distA[nn]||0)+1;});var maxV=Math.max.apply(null,Object.keys(distA).map(function(k){return distA[k];}));h+='<div class="shdr"><div class="shdr-ico" style="background:#6A1B9A"><svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg></div><span class="shdr-t">Distribuzione per Area</span></div>';h+='<div class="clist">';Object.keys(distA).sort().forEach(function(k){var col=cArea(k);var perc=Math.round(distA[k]/maxV*100);h+='<div class="drow"><div class="dtop"><div class="ddot" style="background:'+col+'"></div><span class="dnome">'+k+'</span><span class="dn" style="color:'+col+'">'+distA[k]+'</span></div><div class="dbar-w"><div class="dbar" style="width:'+perc+'%;background:'+col+'"></div></div></div>';});h+="</div>";document.getElementById("content").innerHTML=h;}
+function renderOrg(eco){var ass=ordinaAss(eco.assegnazioni.filter(function(a){return a.Stato_Assegnazione==="Attivo";}),eco);var h='<div class="swrap"><svg class="sico" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" class="sinp" id="orgs" placeholder="Cerca nome, ruolo, area..." oninput="filtraOrg(this.value)"></div><div id="orl">';for(var i=0;i<ass.length;i++){var a=ass[i];var ris=eco.risorse.find(function(r){return r.ID_Risorsa===a.ID_Risorsa;});var ruo=eco.ruoli.find(function(r){return r.ID_Ruolo===a.ID_Ruolo;});var area=eco.aree.find(function(ar){return ar.ID_Area===a.ID_Area_Aziendale;});var isVac=!ris||ris.Stato_Operativo!=="Attivo";var isResp=ruo&&ruo.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE")>=0;var nA=area?area.Nome_Area:"N/D";var col=isVac?"#C62828":cR(nA,isResp);var nome=isVac?"POSIZIONE SCOPERTA":ris.Cognome+" "+ris.Nome;var ini=isVac?"!":(ris.Nome.charAt(0)+ris.Cognome.charAt(0)).toUpperCase();var aid=a.ID_Assegnazione;h+='<div class="clist orc" style="border-left:5px solid '+col+';background:'+(isResp?bgResp(nA):"white")+'" onclick="apriScheda(\''+aid+'\')">';h+='<div class="crow">';h+='<div class="cav" style="background:'+col+'">'+ini+'</div>';h+='<div class="cbody"><p class="cnome" style="'+(isVac?"color:#C62828":"")+'">'+nome+'</p><p class="crole">'+(ruo?ruo.Titolo_Ruolo:"--")+'</p><p class="carea">'+nA+'</p></div>';h+='<svg class="chev" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';h+='</div></div>';}h+="</div>";document.getElementById("content").innerHTML=h;}
+function filtraOrg(q){var t=q?q.toLowerCase():"";document.querySelectorAll(".orc").forEach(function(c){c.style.display=!t||c.textContent.toLowerCase().indexOf(t)>=0?"":"none";});}
+function apriScheda(idAss){if(!ECO)return;var ass=ECO.assegnazioni.find(function(a){return a.ID_Assegnazione===idAss;});if(!ass)return;var ris=ECO.risorse.find(function(r){return r.ID_Risorsa===ass.ID_Risorsa;});var ruo=ECO.ruoli.find(function(r){return r.ID_Ruolo===ass.ID_Ruolo;});var area=ECO.aree.find(function(a){return a.ID_Area===ass.ID_Area_Aziendale;});var isVac=!ris||ris.Stato_Operativo!=="Attivo";var nome=isVac?"POSIZIONE SCOPERTA":ris.Cognome+" "+ris.Nome;var nA=area?area.Nome_Area:"--";var rA="--";if(ruo&&ruo.Riporta_A&&ruo.Riporta_A!=="-"){var pp=ruo.Riporta_A.split(",");var nn=[];pp.forEach(function(x){var r2=ECO.ruoli.find(function(y){return y.ID_Ruolo===x.trim();});nn.push(r2?r2.Titolo_Ruolo:x.trim());});rA=nn.join(", ");}var geoIds=[];try{geoIds=JSON.parse(ass.ID_Area_Geografica);}catch(e){if(ass.ID_Area_Geografica)geoIds=[ass.ID_Area_Geografica];}var geoStr=geoIds.map(function(id){var g=ECO.areeGeo.find(function(x){return x.ID_AreaGeo===id;});return g?g.Nome_Area:id;}).join(", ");var h='<p style="font-size:11px;font-weight:800;color:#64748B;text-transform:uppercase;margin:0 0 4px;">'+nA+'</p>';h+='<p style="font-size:20px;font-weight:900;margin:0 0 4px;'+(isVac?"color:#C62828":"")+'">'+nome+'</p>';h+='<p style="font-size:14px;color:#1565C0;font-weight:700;margin:0 0 8px;">'+(ruo?ruo.Titolo_Ruolo:"--")+'</p>';if(geoStr)h+='<p style="font-size:13px;color:#64748B;margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid #F1F5F9;">Territorio: '+geoStr+'</p>';if(ruo){var sez=[{l:"Descrizione",v:ruo.Descrizione_Sintetica},{l:"Responsabilita",v:ruo.Responsabilita_Principali},{l:"Rapporti Interni",v:ruo.Rapporti_Interni},{l:"Rapporti Esterni",v:ruo.Rapporti_Esterni},{l:"Esperienza",v:ruo.Esperienza_Pregressa},{l:"Doti Personali",v:ruo.Doti_Personali},{l:"Riporta a",v:rA}];sez.forEach(function(s){if(!s.v||s.v==="--"||s.v==="-")return;h+='<p class="dlbl">'+s.l+'</p><p class="dval">'+s.v+'</p>';});}openSheet(nome,h);}
+function renderMansionario(eco){var ruoli=eco.ruoli.filter(function(r){return r.Stato_Operativo==="Attivo";}).sort(function(a,b){var aA=eco.aree.find(function(ar){return ar.ID_Area===a.Area_Aziendale;});var aB=eco.aree.find(function(ar){return ar.ID_Area===b.Area_Aziendale;});var nA=aA?aA.Nome_Area:"";var nB=aB?aB.Nome_Area:"";if(nA!==nB)return nA.localeCompare(nB,"it");var rA=a.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE")>=0?0:1;var rB=b.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE")>=0?0:1;if(rA!==rB)return rA-rB;return a.Titolo_Ruolo.localeCompare(b.Titolo_Ruolo,"it");});var h='<div class="swrap"><svg class="sico" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input type="text" class="sinp" id="mans" placeholder="Cerca ruolo o area..." oninput="filtraMan(this.value)"></div><div id="manl">';for(var i=0;i<ruoli.length;i++){var r=ruoli[i];var area=eco.aree.find(function(a){return a.ID_Area===r.Area_Aziendale;});var nA=area?area.Nome_Area:"N/D";var isR=r.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE")>=0;var col=cR(nA,isR);var bg=bgR(nA,isR);var assN=eco.assegnazioni.filter(function(a){return a.ID_Ruolo===r.ID_Ruolo&&a.Stato_Assegnazione==="Attivo";}).length;var rid=r.ID_Ruolo;h+='<div class="rcard manc" style="background:'+bg+'" onclick="apriRuolo(\''+rid+'\')">';h+='<div class="rstripe" style="background:'+col+'"></div>';h+='<div class="rbody"><p class="rtitle">'+r.Titolo_Ruolo+'</p><p class="rarea" style="color:'+col+'">'+nA+'</p></div>';h+='<div class="rright"><span class="rbadge">'+assN+'</span><svg style="width:20px;height:20px;fill:#CBD5E1" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div></div>';}h+="</div>";document.getElementById("content").innerHTML=h;}
+function filtraMan(q){var t=q?q.toLowerCase():"";document.querySelectorAll(".manc").forEach(function(c){c.style.display=!t||c.textContent.toLowerCase().indexOf(t)>=0?"":"none";});}
+function apriRuolo(idRuolo){if(!ECO)return;var ruo=ECO.ruoli.find(function(r){return r.ID_Ruolo===idRuolo;});if(!ruo)return;var area=ECO.aree.find(function(a){return a.ID_Area===ruo.Area_Aziendale;});var assAtt=ECO.assegnazioni.filter(function(a){return a.ID_Ruolo===idRuolo&&a.Stato_Assegnazione==="Attivo";});var rA="--";if(ruo.Riporta_A&&ruo.Riporta_A!=="-"){var pp=ruo.Riporta_A.split(",");var nn=[];pp.forEach(function(x){var r2=ECO.ruoli.find(function(y){return y.ID_Ruolo===x.trim();});nn.push(r2?r2.Titolo_Ruolo:x.trim());});rA=nn.join(", ");}var h='<p style="font-size:11px;font-weight:800;color:#64748B;text-transform:uppercase;margin:0 0 4px;">'+(area?area.Nome_Area:"--")+'</p>';if(assAtt.length>0){h+='<p class="dlbl">Assegnati</p>';assAtt.forEach(function(a){var ris=ECO.risorse.find(function(r){return r.ID_Risorsa===a.ID_Risorsa;});h+='<div style="padding:10px 0;border-bottom:1px solid #F1F5F9;font-size:15px;font-weight:700;">'+(ris?ris.Cognome+" "+ris.Nome:"POSIZIONE SCOPERTA")+'</div>';});}var sez=[{l:"Descrizione",v:ruo.Descrizione_Sintetica},{l:"Responsabilita",v:ruo.Responsabilita_Principali},{l:"Rapporti Interni",v:ruo.Rapporti_Interni},{l:"Rapporti Esterni",v:ruo.Rapporti_Esterni},{l:"Esperienza",v:ruo.Esperienza_Pregressa},{l:"Doti Personali",v:ruo.Doti_Personali},{l:"Riporta a",v:rA}];sez.forEach(function(s){if(!s.v||s.v==="--"||s.v==="-")return;h+='<p class="dlbl" style="margin-top:14px;">'+s.l+'</p><p class="dval">'+s.v+'</p>';});openSheet(ruo.Titolo_Ruolo,h);}
+function renderComunicazioni(risposta){if(!risposta||!risposta.esito||risposta.tabCreato||!risposta.dati||!risposta.dati.length){document.getElementById("content").innerHTML='<div class="empty"><div class="empty-ico">&#128139;</div><p class="empty-t">Nessuna comunicazione disponibile</p></div>';return;}DOCS=risposta.dati;var cats=["TUTTI"];DOCS.forEach(function(d){if(d.Categoria&&cats.indexOf(d.Categoria)<0)cats.push(d.Categoria);});var h='<div class="catbar" id="catbar">';cats.forEach(function(c,i){h+='<button class="catbtn'+(i===0?" act":"")+'" onclick="filtraCat(this,\''+c+'\')">'+c+'</button>';});h+='</div><div id="docl">'+renderDocsList(DOCS)+'</div>';document.getElementById("content").innerHTML=h;}
+function renderDocsList(docs){if(!docs.length)return'<div class="empty"><p class="empty-t">Nessun documento per questa categoria</p></div>';var catCol={"REGOLAMENTI":"#6A1B9A","CIRCOLARI":"#1565C0","CONTRATTI":"#00695C","SICUREZZA":"#B71C1C","FORMAZIONE":"#E65100"};var h="";docs.forEach(function(d){var col=catCol[d.Categoria]||"#1565C0";var onclick=d.Link_Drive?"onclick=\"apriDoc('"+d.Link_Drive.replace(/'/g,"\\'")+"','"+d.Titolo.replace(/'/g,"\\'")+"\')\"":"";h+='<div class="dcard" '+onclick+'>';h+='<div class="dcard-hdr"><span class="dcat" style="color:'+col+'">'+(d.Categoria||"DOCUMENTO")+'</span><span class="drev">Rev.'+(d.Revisione||"00")+" -- "+(d.Data_Emissione||"--")+'</span></div>';h+='<p class="dtitle">'+d.Titolo+'</p>';if(d.Destinatari)h+='<p class="ddest">'+d.Destinatari+'</p>';h+='</div>';});return h;}
+function filtraCat(btn,cat){document.querySelectorAll("#catbar .catbtn").forEach(function(b){b.classList.remove("act");});btn.classList.add("act");var f=cat==="TUTTI"?DOCS:DOCS.filter(function(d){return d.Categoria===cat;});document.getElementById("docl").innerHTML=renderDocsList(f);}
+function apriDoc(link,titolo){var embed=link;var m=link.match(/\/d\/([a-zA-Z0-9_-]+)/);if(m&&m[1])embed="https://drive.google.com/file/d/"+m[1]+"/preview";openSheet(titolo,"<iframe src='"+embed+"' style='width:100%;height:65vh;border:none;border-radius:10px' allowfullscreen></iframe>");}
+function renderStampe(){var h="";if(STATO_DOC&&STATO_DOC.alertScadenza)h+='<div class="banw"><p class="banw-t">Revisione SGQ richiesta</p></div>';var btns=[{lbl:"Organigramma",sub:"Struttura aziendale (A3)",col:"#1A237E",svg:"M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"},{lbl:"Mansionario",sub:"Schede ruolo (A4)",col:"#1565C0",svg:"M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"},{lbl:"Cruscotto KPI",sub:"Dati direzionali (A4)",col:"#4527A0",svg:"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"},{lbl:"Report Completo",sub:"Tutte le sezioni",col:"#6A1B9A",svg:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"}];h+='<p class="hwelcome">Seleziona documento</p>';btns.forEach(function(b){h+='<div class="stamp" onclick="apriInfoStampa()"><div class="stamp-ico" style="background:'+b.col+'"><svg viewBox="0 0 24 24"><path d="'+b.svg+'"/></svg></div><div class="stamp-body"><p class="stamp-lbl">'+b.lbl+'</p><p class="stamp-sub">'+b.sub+'</p></div><svg class="stamp-arr" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>';});h+='<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:16px;margin-top:16px;"><p style="font-size:14px;color:#1E40AF;line-height:1.6;margin:0"><strong>Come stampare:</strong> Le stampe vengono generate dal gestionale desktop. Apri il link sul tuo computer per accedere al Centro Stampe.</p></div>';document.getElementById("content").innerHTML=h;}
+function apriInfoStampa(){openSheet("Stampa documenti",'<p style="font-size:15px;color:#1A202C;line-height:1.6;margin-bottom:16px;">Per generare i PDF ufficiali usa la versione desktop del gestionale.</p><button class="btnblu" onclick="closeSheet()">OK</button>');}
+(function(){var token=localStorage.getItem("hr_token");var ruolo=localStorage.getItem("hr_ruolo");var nome=localStorage.getItem("hr_nome");if(token&&ruolo&&nome){api({action:"verifica",token:token}).then(function(r){if(r.valida)avviaApp(token,r.ruolo,r.nome);else{localStorage.clear();document.getElementById("lu").focus();}}).catch(function(){avviaApp(token,ruolo,nome);});}else{document.getElementById("lu").focus();}if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}})();
+</script>
+</body>
+</html>
