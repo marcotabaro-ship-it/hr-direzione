@@ -258,8 +258,335 @@ function renderComunicazioni(risposta){if(!risposta||!risposta.esito||risposta.t
 function renderDocsList(docs){if(!docs.length)return'<div class="empty"><p class="empty-t">Nessun documento per questa categoria</p></div>';var catCol={"REGOLAMENTI":"#6A1B9A","CIRCOLARI":"#1565C0","CONTRATTI":"#00695C","SICUREZZA":"#B71C1C","FORMAZIONE":"#E65100"};var h="";docs.forEach(function(d){var col=catCol[d.Categoria]||"#1565C0";var onclick=d.Link_Drive?"onclick=\"apriDoc('"+d.Link_Drive.replace(/'/g,"\\'")+"','"+d.Titolo.replace(/'/g,"\\'")+"\')\"":"";h+='<div class="dcard" '+onclick+'>';h+='<div class="dcard-hdr"><span class="dcat" style="color:'+col+'">'+(d.Categoria||"DOCUMENTO")+'</span><span class="drev">Rev.'+(d.Revisione||"00")+" -- "+(d.Data_Emissione||"--")+'</span></div>';h+='<p class="dtitle">'+d.Titolo+'</p>';if(d.Destinatari)h+='<p class="ddest">'+d.Destinatari+'</p>';h+='</div>';});return h;}
 function filtraCat(btn,cat){document.querySelectorAll("#catbar .catbtn").forEach(function(b){b.classList.remove("act");});btn.classList.add("act");var f=cat==="TUTTI"?DOCS:DOCS.filter(function(d){return d.Categoria===cat;});document.getElementById("docl").innerHTML=renderDocsList(f);}
 function apriDoc(link,titolo){var embed=link;var m=link.match(/\/d\/([a-zA-Z0-9_-]+)/);if(m&&m[1])embed="https://drive.google.com/file/d/"+m[1]+"/preview";openSheet(titolo,"<iframe src='"+embed+"' style='width:100%;height:65vh;border:none;border-radius:10px' allowfullscreen></iframe>");}
-function renderStampe(){var h="";if(STATO_DOC&&STATO_DOC.alertScadenza)h+='<div class="banw"><p class="banw-t">Revisione SGQ richiesta</p></div>';var btns=[{lbl:"Organigramma",sub:"Struttura aziendale (A3)",col:"#1A237E",svg:"M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"},{lbl:"Mansionario",sub:"Schede ruolo (A4)",col:"#1565C0",svg:"M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"},{lbl:"Cruscotto KPI",sub:"Dati direzionali (A4)",col:"#4527A0",svg:"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"},{lbl:"Report Completo",sub:"Tutte le sezioni",col:"#6A1B9A",svg:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"}];h+='<p class="hwelcome">Seleziona documento</p>';btns.forEach(function(b){h+='<div class="stamp" onclick="apriInfoStampa()"><div class="stamp-ico" style="background:'+b.col+'"><svg viewBox="0 0 24 24"><path d="'+b.svg+'"/></svg></div><div class="stamp-body"><p class="stamp-lbl">'+b.lbl+'</p><p class="stamp-sub">'+b.sub+'</p></div><svg class="stamp-arr" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>';});h+='<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:16px;margin-top:16px;"><p style="font-size:14px;color:#1E40AF;line-height:1.6;margin:0"><strong>Come stampare:</strong> Le stampe vengono generate dal gestionale desktop. Apri il link sul tuo computer per accedere al Centro Stampe.</p></div>';document.getElementById("content").innerHTML=h;}
-function apriInfoStampa(){openSheet("Stampa documenti",'<p style="font-size:15px;color:#1A202C;line-height:1.6;margin-bottom:16px;">Per generare i PDF ufficiali usa la versione desktop del gestionale.</p><button class="btnblu" onclick="closeSheet()">OK</button>');}
+function renderStampe(){
+  var h="";
+  if(STATO_DOC&&STATO_DOC.alertScadenza) h+='<div class="banw"><p class="banw-t">Revisione SGQ richiesta</p></div>';
+  h+='<p class="hwelcome">Seleziona documento</p>';
+  var btns=[
+    {lbl:"Organigramma",      sub:"Struttura aziendale (A3)",   col:"#1A237E", fn:"stampaOrg",       svg:"M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"},
+    {lbl:"Mansionario",       sub:"Schede ruolo complete (A4)", col:"#1565C0", fn:"stampaMansionario",svg:"M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"},
+    {lbl:"Cruscotto KPI",     sub:"Dati direzionali (A4)",      col:"#4527A0", fn:"stampaCruscotto",  svg:"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"},
+    {lbl:"Report Completo",   sub:"Tutte le sezioni",            col:"#6A1B9A", fn:"stampaReport",     svg:"M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"}
+  ];
+  btns.forEach(function(b){
+    h+='<div class="stamp" onclick="'+b.fn+'()">';
+    h+='<div class="stamp-ico" style="background:'+b.col+'"><svg viewBox="0 0 24 24"><path d="'+b.svg+'"/></svg></div>';
+    h+='<div class="stamp-body"><p class="stamp-lbl">'+b.lbl+'</p><p class="stamp-sub">'+b.sub+'</p></div>';
+    h+='<svg class="stamp-arr" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';
+    h+='</div>';
+  });
+  h+='<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px;margin-top:16px;">';
+  h+='<p style="font-size:13px;color:#1E40AF;line-height:1.6;margin:0">Sblocca i popup nel browser per usare la stampa. Su Safari: Impostazioni Safari &rarr; Blocca popup &rarr; disattiva.</p>';
+  h+='</div>';
+  document.getElementById("content").innerHTML=h;
+}
+
+// ── FUNZIONI STAMPA ───────────────────────────────────────────────────────
+var LOGO_URL = "https://drive.google.com/thumbnail?id=1tolOa9jOrDVG0MIzo3egX8NeR1W6LjWv&sz=w200";
+
+function apriFinestra(formato, htmlPuro) {
+  var pageRule = formato === "cruscotto" ? "A4 landscape" : formato === "organigramma" ? "A3 landscape" : "A4 portrait";
+  var win = window.open("", "_blank");
+  if (!win) { alert("Sblocca i popup nel browser per usare la stampa."); return; }
+  win.document.write('<!DOCTYPE html><html><head><title>Stampa</title><style>' +
+    '@page{size:'+pageRule+';margin:10mm;}' +
+    'body{font-family:"Segoe UI",Arial,sans-serif;color:#000;background:white;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}' +
+    'table{border-collapse:collapse;width:100%;border:2px solid black;margin-bottom:14px;font-size:11px;}' +
+    'td,th{border:1px solid black;padding:5px;}' +
+    '.footer-firme{display:flex;justify-content:space-between;border-top:2px solid black;margin-top:28px;padding:10px 0;font-size:11px;font-weight:bold;}' +
+    '.scheda-print{page-break-inside:avoid;page-break-after:always;padding:0;}' +
+    '.scheda-print:last-child{page-break-after:auto;}' +
+    '.scheda-corpo{border:1px solid #000;padding:14px;margin-top:0;}' +
+    'svg{display:block;width:100%!important;height:auto!important;}' +
+    '</style></head><body>' + htmlPuro + '</body></html>');
+  win.document.close();
+  setTimeout(function(){ win.focus(); win.print(); }, 1200);
+}
+
+function cartiglioHTML(titolo, doc) {
+  var logoHtml = '<img src="'+LOGO_URL+'" style="max-width:110px;max-height:60px;display:block;margin:0 auto 3px;">';
+  var d = doc || {};
+  return '<table><tr>' +
+    '<td style="width:20%;text-align:center;vertical-align:middle;padding:6px;">' + logoHtml + '<p style="margin:0;font-size:8px;color:#555;">Sistema Integrato HR</p></td>' +
+    '<td style="width:55%;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase;vertical-align:middle;padding:6px;">' + titolo + '</td>' +
+    '<td style="width:25%;font-size:9px;line-height:1.7;vertical-align:middle;padding:6px;">' +
+      '<strong>Codice:</strong> '+(d.codiceUfficiale||"-")+'<br>' +
+      '<strong>Edizione:</strong> '+(d.edizione||"-")+'<br>' +
+      '<strong>Revisione:</strong> Rev. '+(d.revisione||"00")+'<br>' +
+      '<strong>Data:</strong> '+(d.dataApprovazione||"-") +
+    '</td></tr></table>';
+}
+
+function cartiglioSchedaHTML(ruolo, manDoc) {
+  var man = manDoc || {};
+  var logoHtml = '<img src="'+LOGO_URL+'" style="max-width:110px;max-height:60px;display:block;margin:0 auto 3px;">';
+  var revScheda = ruolo && ruolo.Revisione_Scheda ? String(ruolo.Revisione_Scheda).padStart(2,"0") : "00";
+  var dataRev = ruolo && ruolo.Data_Rev_Scheda ? ruolo.Data_Rev_Scheda : (man.dataApprovazione||"-");
+  var anno = dataRev.split("/")[2] || new Date().getFullYear();
+  var idRuolo = ruolo && ruolo.ID_Ruolo ? ruolo.ID_Ruolo : "SCH";
+  var codice = "SCH-"+idRuolo+"-"+anno+"-"+revScheda;
+  return '<table><tr>' +
+    '<td style="width:20%;text-align:center;vertical-align:middle;padding:6px;">' + logoHtml + '<p style="margin:0;font-size:8px;color:#555;">Sistema Integrato HR</p></td>' +
+    '<td style="width:55%;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase;vertical-align:middle;padding:6px;">Mansionario Aziendale — Scheda Ruolo</td>' +
+    '<td style="width:25%;font-size:9px;line-height:1.7;vertical-align:middle;padding:6px;">' +
+      '<strong>Codice:</strong> '+codice+'<br>' +
+      '<strong>Edizione:</strong> '+(man.edizione||"-")+'<br>' +
+      '<strong>Revisione:</strong> Rev. '+revScheda+'<br>' +
+      '<strong>Data:</strong> '+dataRev +
+    '</td></tr></table>';
+}
+
+function footerFirme() {
+  return '<div class="footer-firme"><span>Redatto da: Consiglio Direttivo Aziendale</span><span>Approvato da: Titolari / Amministratori</span></div>';
+}
+
+function assicuraEco(cb) {
+  if (ECO) { cb(ECO); return; }
+  showNotif("Caricamento dati...");
+  api({action:"eco",token:S.token}).then(function(d){ ECO=d; cb(d); }).catch(function(){ alert("Errore caricamento dati."); });
+}
+function assicuraStato(cb) {
+  if (STATO_DOC) { cb(STATO_DOC); return; }
+  api({action:"stato",token:S.token}).then(function(q){ STATO_DOC=q; cb(q); }).catch(function(){ cb({}); });
+}
+
+function stampaOrg() {
+  assicuraEco(function(eco) {
+    var svg = generaSVGOrg(eco);
+    if (!svg) { alert("Nessun dato per l'organigramma."); return; }
+    assicuraStato(function(stato) {
+      var doc = stato.documenti && stato.documenti["ORG"] ? stato.documenti["ORG"] : {};
+      var cart = cartiglioHTML("ORGANIGRAMMA OPERATIVO E STRUTTURA AZIENDALE", doc);
+      apriFinestra("organigramma", cart + '<div style="width:100%;margin-top:6mm;">' + svg + '</div>' + footerFirme());
+    });
+  });
+}
+
+function stampaMansionario() {
+  assicuraEco(function(eco) {
+    assicuraStato(function(stato) {
+      var manDoc = stato.documenti && stato.documenti["MAN"] ? stato.documenti["MAN"] : {};
+      var mesi = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+      var oggi = new Date();
+      var logoHtml = '<img src="'+LOGO_URL+'" style="max-width:220px;max-height:120px;display:block;margin:0 auto 18px;">';
+      var copertina = '<div style="page-break-after:always;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260mm;text-align:center;padding:40px;">' +
+        logoHtml +
+        '<h1 style="font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#0F172A;margin:0 0 10px;">Mansionario Aziendale</h1>' +
+        '<h2 style="font-size:16px;font-weight:400;color:#64748B;margin:0 0 30px;">Schede Ruolo e Responsabilita</h2>' +
+        '<div style="width:80px;height:4px;background:#0284C7;margin:0 auto 30px;"></div>' +
+        '<p style="font-size:12px;color:#94A3B8;margin:4px 0;"><strong>Codice:</strong> '+(manDoc.codiceUfficiale||"-")+'</p>' +
+        '<p style="font-size:12px;color:#94A3B8;margin:4px 0;"><strong>Edizione:</strong> '+(manDoc.edizione||"-")+'</p>' +
+        '<p style="font-size:12px;color:#94A3B8;margin:4px 0;"><strong>Data:</strong> '+(manDoc.dataApprovazione||"-")+'</p>' +
+        '</div>';
+      var inc = eco.assegnazioni.filter(function(a){return a.Stato_Assegnazione==="Attivo";});
+      inc = ordinaAss(inc, eco);
+      if (!inc.length) { alert("Nessun ruolo attivo."); return; }
+      var html = copertina;
+      inc.forEach(function(i) {
+        var ruo  = eco.ruoli.find(function(r){return r.ID_Ruolo===i.ID_Ruolo;});
+        var ris  = eco.risorse.find(function(r){return r.ID_Risorsa===i.ID_Risorsa;});
+        var area = eco.aree.find(function(ar){return ar.ID_Area===i.ID_Area_Aziendale;});
+        if (!ruo) return;
+        var rA = ruo.Riporta_A || "-";
+        if (rA && rA !== "-") {
+          var pp = rA.split(","); var nn = [];
+          pp.forEach(function(x){var r2=eco.ruoli.find(function(y){return y.ID_Ruolo===x.trim();});nn.push(r2?r2.Titolo_Ruolo:x.trim());});
+          rA = nn.join(", ");
+        }
+        var isVac = !ris || ris.Stato_Operativo !== "Attivo";
+        html += '<div class="scheda-print">' + cartiglioSchedaHTML(ruo, manDoc) +
+          '<div class="scheda-corpo">' +
+          '<h2 style="color:#0284C7;border-bottom:2px solid #0284C7;padding-bottom:4px;margin-top:8px;">Scheda Ruolo: '+ruo.Titolo_Ruolo+'</h2>' +
+          '<p style="margin:4px 0;font-size:11px;"><strong>Area Aziendale:</strong> '+(area?area.Nome_Area:"-")+'</p>' +
+          '<p style="margin:4px 0;font-size:11px;"><strong>Risorsa Assegnata:</strong> '+(isVac?'<span style="color:#EF4444;">POSIZIONE SCOPERTA</span>':ris.Cognome+" "+ris.Nome)+'</p>' +
+          '<p style="margin:4px 0 12px;font-size:11px;"><strong>Riporta a:</strong> '+rA+'</p>' +
+          '<h4 style="background:#eee;padding:4px 8px;margin:10px 0 4px;border:1px solid #000;">Descrizione Sintetica</h4>' +
+          '<p style="font-size:11px;margin:4px 0;">'+(ruo.Descrizione_Sintetica||"-")+'</p>' +
+          '<h4 style="background:#eee;padding:4px 8px;margin:10px 0 4px;border:1px solid #000;">Responsabilita Principali</h4>' +
+          '<p style="font-size:11px;white-space:pre-wrap;margin:4px 0;">'+(ruo.Responsabilita_Principali||"-")+'</p>' +
+          '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;">' +
+          '<tr><td style="width:50%;border:1px solid #000;padding:8px;vertical-align:top;"><strong>Rapporti Interni:</strong><br>'+(ruo.Rapporti_Interni||"-")+'</td>' +
+          '<td style="border:1px solid #000;padding:8px;vertical-align:top;"><strong>Rapporti Esterni:</strong><br>'+(ruo.Rapporti_Esterni||"-")+'</td></tr>' +
+          '<tr><td style="border:1px solid #000;padding:8px;vertical-align:top;"><strong>Esperienza:</strong><br>'+(ruo.Esperienza_Pregressa||"-")+'</td>' +
+          '<td style="border:1px solid #000;padding:8px;vertical-align:top;"><strong>Doti Personali:</strong><br>'+(ruo.Doti_Personali||"-")+'</td></tr>' +
+          '</table>' + footerFirme() + '</div></div>';
+      });
+      apriFinestra("mansionario", html);
+    });
+  });
+}
+
+function stampaCruscotto() {
+  assicuraEco(function(eco) {
+    assicuraStato(function(stato) {
+      var doc = stato.documenti && stato.documenti["ORG"] ? stato.documenti["ORG"] : {};
+      var inc = eco.assegnazioni.filter(function(a){return a.Stato_Assegnazione==="Attivo";});
+      var cop = 0; var sco = 0; var distA = {}; var distT = {};
+      inc.forEach(function(a){
+        var ris = eco.risorse.find(function(r){return r.ID_Risorsa===a.ID_Risorsa;});
+        var area = eco.aree.find(function(ar){return ar.ID_Area===a.ID_Area_Aziendale;});
+        var nA = area ? area.Nome_Area : "N/D";
+        if (ris && ris.Stato_Operativo==="Attivo") { cop++; var t=ris.Tipo_Risorsa||"N/D"; distT[t]=(distT[t]||0)+1; } else sco++;
+        distA[nA]=(distA[nA]||0)+1;
+      });
+      var tasso = inc.length > 0 ? Math.round(cop/inc.length*100) : 0;
+      var att = eco.risorse.filter(function(r){return r.Stato_Operativo==="Attivo";}).length;
+      var header = cartiglioHTML("Cruscotto Direzionale e Saturazione Organizzativa", doc);
+      var kpiHtml = '<div style="display:flex;gap:10px;margin-bottom:14px;">';
+      [{t:"RISORSE ATTIVE",v:att,c:""},{t:"RUOLI COPERTI",v:cop,c:""},{t:"RUOLI SCOPERTI",v:sco,c:sco>0?"#EF4444":""},{t:"COPERTURA %",v:tasso+"%",c:tasso<85?"#EF4444":""}].forEach(function(k){
+        kpiHtml+='<div style="flex:1;border:1px solid #000;padding:10px;text-align:center;"><div style="font-size:9px;font-weight:700;color:#64748B;margin-bottom:4px;">'+k.t+'</div><div style="font-size:22px;font-weight:900;'+(k.c?"color:"+k.c+";":"")+'">'+k.v+'</div></div>';
+      });
+      kpiHtml += '</div>';
+      var tabA = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"><div><h4 style="margin:0 0 6px;font-size:10px;font-weight:700;color:#64748B;">DISTRIBUZIONE PER AREA</h4><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr><th style="background:#0284C7!important;color:white;padding:4px 6px;text-align:left;border:1px solid #000;">Area</th><th style="background:#0284C7!important;color:white;padding:4px 6px;text-align:center;border:1px solid #000;">Incarichi</th></tr></thead><tbody>';
+      Object.keys(distA).sort().forEach(function(k,i){tabA+='<tr style="'+(i%2===0?"":"background:#F8FAFC;")+'"><td style="padding:4px 6px;border:1px solid #ccc;">'+k+'</td><td style="padding:4px 6px;border:1px solid #ccc;text-align:center;">'+distA[k]+'</td></tr>';});
+      tabA += '</tbody></table></div><div><h4 style="margin:0 0 6px;font-size:10px;font-weight:700;color:#64748B;">DISTRIBUZIONE PER TIPO RISORSA</h4><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr><th style="background:#0284C7!important;color:white;padding:4px 6px;text-align:left;border:1px solid #000;">Tipo</th><th style="background:#0284C7!important;color:white;padding:4px 6px;text-align:center;border:1px solid #000;">Unita</th></tr></thead><tbody>';
+      Object.keys(distT).sort().forEach(function(k,i){tabA+='<tr style="'+(i%2===0?"":"background:#F8FAFC;")+'"><td style="padding:4px 6px;border:1px solid #ccc;">'+k+'</td><td style="padding:4px 6px;border:1px solid #ccc;text-align:center;">'+distT[k]+'</td></tr>';});
+      tabA += '</tbody></table></div></div>';
+      apriFinestra("cruscotto", header + kpiHtml + tabA + footerFirme());
+    });
+  });
+}
+
+function stampaReport() {
+  assicuraEco(function(eco) {
+    assicuraStato(function(stato) {
+      var doc = stato.documenti && stato.documenti["ORG"] ? stato.documenti["ORG"] : {};
+      var manDoc = stato.documenti && stato.documenti["MAN"] ? stato.documenti["MAN"] : {};
+      var logoHtml = '<img src="'+LOGO_URL+'" style="max-width:220px;max-height:100px;display:block;margin:0 auto 16px;">';
+      var html = '<div style="page-break-after:always;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260mm;text-align:center;padding:40px;">' +
+        logoHtml + '<h1 style="font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#0F172A;margin:0 0 8px;">Report Gestionale Completo</h1>' +
+        '<h2 style="font-size:14px;font-weight:400;color:#64748B;margin:0 0 24px;">Anagrafica, Ruoli, Aree, Mappatura</h2>' +
+        '<p style="font-size:12px;color:#94A3B8;margin:3px 0;"><strong>Codice:</strong> '+(doc.codiceUfficiale||"-")+'</p>' +
+        '<p style="font-size:12px;color:#94A3B8;margin:3px 0;"><strong>Data:</strong> '+(doc.dataApprovazione||"-")+'</p></div>';
+      var header = cartiglioHTML("Report Gestionale Completo", doc);
+      var td = 'padding:5px 8px;border:1px solid #ccc;vertical-align:top;';
+      var th = 'background:#0284C7!important;color:white;padding:6px 8px;text-align:left;border:1px solid #000;font-weight:700;';
+      // Sezione 1: Anagrafica
+      var ris = eco.risorse.filter(function(r){return r.Stato_Operativo==="Attivo";}).sort(function(a,b){return a.Cognome.localeCompare(b.Cognome);});
+      html += '<div style="page-break-after:always;">'+header+'<h3 style="color:#0284C7;border-bottom:2px solid #0284C7;padding-bottom:4px;margin-top:8px;">1. Anagrafica Risorse ('+ris.length+' attive)</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr><th style="'+th+'width:22%;">Cognome</th><th style="'+th+'width:16%;">Nome</th><th style="'+th+'width:20%;">Tipo</th><th style="'+th+'width:18%;">Cellulare</th><th style="'+th+'">Email</th></tr></thead><tbody>';
+      ris.forEach(function(r,i){html+='<tr style="'+(i%2===0?"":"background:#F8FAFC;")+'""><td style="'+td+'"><strong>'+r.Cognome+'</strong></td><td style="'+td+'">'+r.Nome+'</td><td style="'+td+'">'+(r.Tipo_Risorsa||"-")+'</td><td style="'+td+'">'+(r.Cellulare||"-")+'</td><td style="'+td+'">'+(r.Email||"-")+'</td></tr>';});
+      html += '</tbody></table></div>';
+      // Sezione 2: Catalogo Ruoli
+      var ruoli = eco.ruoli.filter(function(r){return r.Stato_Operativo==="Attivo";}).sort(function(a,b){return a.Titolo_Ruolo.localeCompare(b.Titolo_Ruolo);});
+      html += '<div style="page-break-after:always;">'+header+'<h3 style="color:#0284C7;border-bottom:2px solid #0284C7;padding-bottom:4px;margin-top:8px;">2. Catalogo Ruoli ('+ruoli.length+' attivi)</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr><th style="'+th+'width:42%;">Titolo Ruolo</th><th style="'+th+'width:30%;">Area</th><th style="'+th+'width:14%;">Rev.</th><th style="'+th+'width:14%;">Data Rev.</th></tr></thead><tbody>';
+      ruoli.forEach(function(r,i){var a=eco.aree.find(function(ar){return ar.ID_Area===r.Area_Aziendale;});html+='<tr style="'+(i%2===0?"":"background:#F8FAFC;")+'""><td style="'+td+'"><strong>'+r.Titolo_Ruolo+'</strong></td><td style="'+td+'">'+(a?a.Nome_Area:"-")+'</td><td style="'+td+'text-align:center;">'+(r.Revisione_Scheda?"Rev."+r.Revisione_Scheda:"-")+'</td><td style="'+td+'text-align:center;">'+(r.Data_Rev_Scheda||"-")+'</td></tr>';});
+      html += '</tbody></table></div>';
+      // Sezione 3: Organigramma SVG
+      var svg = generaSVGOrg(eco);
+      if (svg) {
+        html += '<div style="page-break-before:always;">'+cartiglioHTML("Organigramma Operativo",doc)+'<div style="width:100%;margin-top:6mm;">'+svg+'</div>'+footerFirme()+'</div>';
+      }
+      // Sezione 4: Schede mansionario
+      var incMan = ordinaAss(eco.assegnazioni.filter(function(a){return a.Stato_Assegnazione==="Attivo";}), eco);
+      incMan.forEach(function(i) {
+        var ruo  = eco.ruoli.find(function(r){return r.ID_Ruolo===i.ID_Ruolo;});
+        var ris2 = eco.risorse.find(function(r){return r.ID_Risorsa===i.ID_Risorsa;});
+        var area = eco.aree.find(function(ar){return ar.ID_Area===i.ID_Area_Aziendale;});
+        if (!ruo) return;
+        var rA = ruo.Riporta_A || "-";
+        if (rA && rA !== "-") { var pp=rA.split(","); var nn=[]; pp.forEach(function(x){var r2=eco.ruoli.find(function(y){return y.ID_Ruolo===x.trim();}); nn.push(r2?r2.Titolo_Ruolo:x.trim());}); rA=nn.join(", "); }
+        var isVac = !ris2 || ris2.Stato_Operativo !== "Attivo";
+        html += '<div style="page-break-before:always;">'+cartiglioSchedaHTML(ruo,manDoc)+
+          '<div class="scheda-corpo">'+
+          '<h2 style="color:#0284C7;border-bottom:2px solid #0284C7;padding-bottom:4px;margin-top:8px;">Scheda Ruolo: '+ruo.Titolo_Ruolo+'</h2>'+
+          '<p style="margin:4px 0;font-size:11px;"><strong>Area:</strong> '+(area?area.Nome_Area:"-")+'</p>'+
+          '<p style="margin:4px 0;font-size:11px;"><strong>Risorsa:</strong> '+(isVac?'<span style="color:#EF4444;">POSIZIONE SCOPERTA</span>':ris2.Cognome+" "+ris2.Nome)+'</p>'+
+          '<p style="margin:4px 0 10px;font-size:11px;"><strong>Riporta a:</strong> '+rA+'</p>'+
+          '<h4 style="background:#eee;padding:4px 8px;margin:8px 0 4px;border:1px solid #000;font-size:11px;">Descrizione</h4><p style="font-size:10px;margin:4px 0;">'+(ruo.Descrizione_Sintetica||"-")+'</p>'+
+          '<h4 style="background:#eee;padding:4px 8px;margin:8px 0 4px;border:1px solid #000;font-size:11px;">Responsabilita</h4><p style="font-size:10px;white-space:pre-wrap;margin:4px 0;">'+(ruo.Responsabilita_Principali||"-")+'</p>'+
+          '<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:10px;">'+
+          '<tr><td style="width:50%;border:1px solid #000;padding:6px;vertical-align:top;"><strong>Rapporti Interni:</strong><br>'+(ruo.Rapporti_Interni||"-")+'</td>'+
+          '<td style="border:1px solid #000;padding:6px;vertical-align:top;"><strong>Rapporti Esterni:</strong><br>'+(ruo.Rapporti_Esterni||"-")+'</td></tr>'+
+          '<tr><td style="border:1px solid #000;padding:6px;vertical-align:top;"><strong>Esperienza:</strong><br>'+(ruo.Esperienza_Pregressa||"-")+'</td>'+
+          '<td style="border:1px solid #000;padding:6px;vertical-align:top;"><strong>Doti Personali:</strong><br>'+(ruo.Doti_Personali||"-")+'</td></tr>'+
+          '</table>'+footerFirme()+'</div></div>';
+      });
+      apriFinestra("report", html);
+    });
+  });
+}
+
+// ── SVG ORGANIGRAMMA ──────────────────────────────────────────────────────
+function generaSVGOrg(eco) {
+  if (!eco || !eco.ruoli) return null;
+  function svgEsc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function trunc(s,n){ var t=(s||"").trim(); return t.length>n?t.substr(0,n-1)+"...":t; }
+  var assAtt = eco.assegnazioni.filter(function(a){return a.Stato_Assegnazione==="Attivo";});
+  var areeGroup = {};
+  eco.ruoli.filter(function(r){return r.Stato_Operativo==="Attivo";}).forEach(function(ruolo){
+    var areaObj = eco.aree.find(function(a){return a.ID_Area===ruolo.Area_Aziendale;});
+    var nomeArea = (areaObj?areaObj.Nome_Area:"Staff").toUpperCase().trim();
+    var isResp = ruolo.Titolo_Ruolo.toUpperCase().indexOf("RESPONSABILE") >= 0;
+    if (!areeGroup[nomeArea]) areeGroup[nomeArea] = { colore: cArea(nomeArea), nodi: [] };
+    var mieAss = assAtt.filter(function(a){return a.ID_Ruolo===ruolo.ID_Ruolo;});
+    if (!mieAss.length) {
+      areeGroup[nomeArea].nodi.push({ ruolo:ruolo.Titolo_Ruolo, nome:"POSIZIONE SCOPERTA", isVac:true, isResp:isResp });
+    } else {
+      mieAss.forEach(function(a){
+        var ris = eco.risorse.find(function(x){return x.ID_Risorsa===a.ID_Risorsa;});
+        var isVac = !ris || ris.Stato_Operativo !== "Attivo";
+        areeGroup[nomeArea].nodi.push({ ruolo:ruolo.Titolo_Ruolo, nome:isVac?"POSIZIONE SCOPERTA":ris.Cognome+" "+ris.Nome, isVac:isVac, isResp:isResp });
+      });
+    }
+  });
+  var aV=[],aO=[];
+  Object.keys(areeGroup).sort().forEach(function(n){
+    if (n.indexOf("DIREZ")>=0||n.indexOf("TITOLAR")>=0||n.indexOf("AMMINISTRAT")>=0) aV.push({nome:n,data:areeGroup[n]});
+    else aO.push({nome:n,data:areeGroup[n]});
+  });
+  aV.sort(function(a,b){return a.nome.indexOf("TITOLAR")>=0?-1:(b.nome.indexOf("TITOLAR")>=0?1:0);});
+  [].concat(aV,aO).forEach(function(a){a.data.nodi.sort(function(x,y){return (y.isResp?1:0)-(x.isResp?1:0);});});
+  var CW=200,HH=30,CH=58,CG=5,COG=5,PAD=20,CONN=40;
+  var maxVn=aV.length?Math.max.apply(null,aV.map(function(a){return a.data.nodi.length;})):0;
+  var maxOn=aO.length?Math.max.apply(null,aO.map(function(a){return a.data.nodi.length;})):0;
+  var vBH=aV.length?HH+maxVn*(CH+CG)+CG:0;
+  var oBH=aO.length?HH+maxOn*(CH+CG)+CG:0;
+  var vBW=aV.length?aV.length*(CW+COG)-COG:0;
+  var oBW=aO.length?aO.length*(CW+COG)-COG:0;
+  var tW=Math.max(vBW,oBW)+PAD*2;
+  var tH=PAD+vBH+(aV.length&&aO.length?CONN:0)+oBH+PAD;
+  var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tW+' '+tH+'" style="width:100%;height:auto;display:block;">';
+  s+='<rect width="'+tW+'" height="'+tH+'" fill="#F8FAFC"/>';
+  function wrapText(testo,maxC){var parole=(testo||"").split(" ");var righe=[];var cur="";parole.forEach(function(p){if((cur+(cur?" ":"")+p).length<=maxC){cur+=(cur?" ":"")+p;}else{if(cur)righe.push(cur);cur=p;}});if(cur)righe.push(cur);return righe;}
+  function card(x,y,nodo,col){
+    var bc=nodo.isVac?"#EF4444":col;
+    var sw=nodo.isResp?2.5:1.5;
+    s+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="4" fill="white" stroke="'+bc+'" stroke-width="'+sw+'"/>';
+    s+='<rect x="'+x+'" y="'+y+'" width="5" height="'+CH+'" rx="2" fill="'+bc+'"/>';
+    var righeR=wrapText(nodo.ruolo.toUpperCase(),26).slice(0,2);
+    righeR.forEach(function(riga,ri){s+='<text x="'+(x+8)+'" y="'+(y+10+ri*9)+'" fill="#64748B" font-size="7" font-weight="bold" font-family="Arial,sans-serif">'+svgEsc(riga)+'</text>';});
+    var sepY=y+10+righeR.length*9+2;
+    s+='<line x1="'+(x+5)+'" y1="'+sepY+'" x2="'+(x+CW-3)+'" y2="'+sepY+'" stroke="#E2E8F0" stroke-width="0.8"/>';
+    var nc=nodo.isVac?"#EF4444":"#0F172A";
+    var righeN=wrapText(nodo.nome,21).slice(0,2);
+    righeN.forEach(function(riga,ri){s+='<text x="'+(x+8)+'" y="'+(sepY+9+ri*10)+'" fill="'+nc+'" font-size="8.5" font-weight="bold" font-family="Arial,sans-serif">'+svgEsc(riga)+'</text>';});
+  }
+  function drawArea(area,x,y){
+    var col=area.data.colore;
+    s+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+HH+'" rx="5" fill="'+col+'"/>';
+    s+='<text x="'+(x+CW/2)+'" y="'+(y+HH/2+5)+'" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial,sans-serif">'+svgEsc(trunc(area.nome,24))+'</text>';
+    area.data.nodi.forEach(function(nodo,ni){card(x,y+HH+CG+ni*(CH+CG),nodo,col);});
+  }
+  if (aV.length) {
+    var vSX=(tW-vBW)/2;
+    aV.forEach(function(a,ci){drawArea(a,vSX+ci*(CW+COG),PAD);});
+    if (aO.length) {
+      var midX=tW/2; var vBot=PAD+vBH; var connMid=vBot+CONN/2;
+      var oSX=(tW-oBW)/2;
+      s+='<line x1="'+midX+'" y1="'+vBot+'" x2="'+midX+'" y2="'+connMid+'" stroke="#94A3B8" stroke-width="1.5"/>';
+      s+='<line x1="'+(oSX+CW/2)+'" y1="'+connMid+'" x2="'+(oSX+oBW-CW/2)+'" y2="'+connMid+'" stroke="#94A3B8" stroke-width="1.5"/>';
+      aO.forEach(function(a,ci){var cx=oSX+ci*(CW+COG)+CW/2;s+='<line x1="'+cx+'" y1="'+connMid+'" x2="'+cx+'" y2="'+(connMid+CONN/2)+'" stroke="#94A3B8" stroke-width="1.5"/>';});
+    }
+  }
+  if (aO.length) {
+    var oSX2=(tW-oBW)/2; var oSY=PAD+vBH+(aV.length?CONN:0);
+    aO.forEach(function(a,ci){drawArea(a,oSX2+ci*(CW+COG),oSY);});
+  }
+  s+='</svg>';
+  return s;
+}
 (function(){var token=localStorage.getItem("hr_token");var ruolo=localStorage.getItem("hr_ruolo");var nome=localStorage.getItem("hr_nome");if(token&&ruolo&&nome){api({action:"verifica",token:token}).then(function(r){if(r.valida)avviaApp(token,r.ruolo,r.nome);else{localStorage.clear();document.getElementById("lu").focus();}}).catch(function(){avviaApp(token,ruolo,nome);});}else{document.getElementById("lu").focus();}if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}})();
 </script>
 </body>
